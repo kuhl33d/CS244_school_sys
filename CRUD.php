@@ -79,21 +79,20 @@ class CRUD{
         }
         */
         public static function Search($fname,$search,$index = -1,$returnLine = false){
-            global $separator;
             if(!file_exists($fname)){
                 return 2;
             }
             else if($search == ""){
                 return 3;
-            }else if(count(explode($separator,$search))<=$index){
+            }else if(count(explode(CRUD::$separator, fgets(fopen($fname, 'r')) ))<=$index){
                 return 4;
             }
             $file = fopen($fname, "r+");
-            $s = explode($separator,$search)[$index];
+
             for($i=0;!feof($file);$i++){
                 $line[$i] = fgets($file);
                 if($index != -1){
-                    if( strcmp(explode($separator,$line[$i])[$index],$s) == 0 ){
+                    if( strcmp(explode(CRUD::$separator,$line[$i])[$index],$search) == 0 ){
                         if($returnLine == false){
                             return 1;
                         }else{
@@ -101,7 +100,7 @@ class CRUD{
                         }
                     }
                 }else{
-                    if( strcmp($line[$i],$s) == 0 ){
+                    if( strcmp($line[$i],$search) == 0 ){
                         if($returnLine == false){
                             return 1;
                         }else{
@@ -125,6 +124,14 @@ class CRUD{
             }
             $l = CRUD::Search($fname,$old,$index,true);
             $contents = file_get_contents($fname);
+            if($index != -1){
+                if(count(explode(CRUD::$separator, fgets(fopen($fname, 'r')) ))<=$index){
+                    return 4;
+                }
+                $arr = explode(CRUD::$separator,$l);
+                $arr[$index] = $new;
+                $new = implode(CRUD::$separator,$arr);
+            }
             $contents = str_replace($l, $new, $contents);
             file_put_contents($fname, $contents);
             return 1;
